@@ -1,0 +1,224 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model File {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  enabled   Boolean  @default(true)
+
+  originalName String
+  size         Int
+  views        Int    @default(0)
+  downloaded   Int    @default(0)
+  path         String
+}
+
+enum BasicRole {
+  USER
+  ADMIN
+}
+
+model Auth {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  enabled   Boolean  @default(true)
+
+  username String? @unique
+  email    String  @unique
+  phone    String? @unique
+  fullname String
+  password String?
+
+  isVerified   Boolean       @default(false)
+  role         BasicRole
+  httpLogs     HttpLog[]
+  individuals  Individual[]
+  annualOwners AnnualOwner[]
+  EndTontine   EndTontine[]
+}
+
+model HttpLog {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  ip     String
+  action String
+  url    String
+  method String
+  query  Json?
+  params Json?
+  body   Json?
+
+  author   Auth?   @relation(fields: [authorId], references: [id])
+  authorId String?
+}
+
+enum Frequency {
+  DAY
+  WEEK
+  MONTH
+}
+
+enum PaiementStatus {
+  DEBT
+  UNPAID
+  PENDING
+  PAID
+  INACTIVE
+}
+
+model Individual {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  enabled   Boolean  @default(true)
+
+  label              String
+  frequency          Frequency
+  unitAmount         Float
+  unitAmountWithFees Float
+  totalAmountToGive  Float
+  totalAmount        Float
+  benefice           Float
+  periodSize         Int
+
+  currentlyPaid Float @default(0.0)
+
+  owner   Auth   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ownerId String
+
+  isClosing Boolean @default(false)
+  closed    Boolean @default(false)
+
+  paiements  IndividualPaiement[]
+  EndTontine EndTontine[]
+}
+
+model IndividualPaiement {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  enabled   Boolean  @default(true)
+
+  individual   Individual @relation(fields: [individualId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  individualId String
+
+  index  Int
+  status PaiementStatus @default(INACTIVE)
+
+  // deadline    DateTime // Is only needed on annual
+  initiateAt  DateTime?
+  confirmedAt DateTime?
+}
+
+model Annual {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  enabled   Boolean  @default(true)
+
+  label              String
+  frequency          Frequency @default(WEEK)
+  penalityAmount     Int       @default(500)
+  unitAmount         Float
+  unitAmountWithFees Float
+  totalAmountToGive  Float
+  totalAmount        Float
+  benefice           Float
+  periodSize         Int       @default(48)
+
+  startAt DateTime
+  closed  Boolean  @default(false)
+
+  annualOwners AnnualOwner[]
+  EndTontine   EndTontine[]
+}
+
+model AnnualOwner {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  enabled   Boolean  @default(true)
+
+  label String
+
+  annual   Annual @relation(fields: [annualId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  annualId String
+
+  owner   Auth   @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ownerId String
+
+  isClosing Boolean @default(false)
+  closed    Boolean @default(false)
+
+  currentlyPaid Float                 @default(0.0)
+  paiements     AnnualOwnerPaiement[]
+}
+
+model AnnualOwnerPaiement {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  enabled   Boolean  @default(true)
+
+  annualOwner   AnnualOwner @relation(fields: [annualOwnerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  annualOwnerId String
+
+  index  Int
+  status PaiementStatus @default(INACTIVE)
+
+  deadline    DateTime
+  initiateAt  DateTime?
+  confirmedAt DateTime?
+}
+
+model EndTontine {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  enabled   Boolean  @default(true)
+
+  receiver  String
+  auth      Auth    @relation(fields: [authId], references: [id])
+  authId    String
+  amount    Float
+  tontine   String
+  confirmed Boolean @default(false)
+  annual    Annual? @relation(fields: [annualId], references: [id])
+  annualId  String?
+
+  individual   Individual? @relation(fields: [individualId], references: [id])
+  individualId String?
+}
+
+enum TaskStatus {
+  REGISTERED
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELED
+}
+
+model Task {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  enabled   Boolean  @default(true)
+
+  label       String
+  at          DateTime
+  payload     Json
+  callbackUrl String
+  status      TaskStatus @default(REGISTERED)
+}

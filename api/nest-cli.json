@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/core/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": true,
+    "assets": [
+      "templates/**/*"
+    ],
+    "watchAssets": true,
+    "tsConfigPath": "apps/core/tsconfig.app.json"
+  },
+  "projects": {
+    "prisma": {
+      "type": "library",
+      "root": "libs/prisma",
+      "entryFile": "index",
+      "sourceRoot": "libs/prisma/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/prisma/tsconfig.lib.json"
+      }
+    },
+    "shared": {
+      "type": "library",
+      "root": "libs/shared",
+      "entryFile": "index",
+      "sourceRoot": "libs/shared/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/shared/tsconfig.lib.json"
+      }
+    },
+    "email": {
+      "type": "library",
+      "root": "libs/email",
+      "entryFile": "index",
+      "sourceRoot": "libs/email/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/email/tsconfig.lib.json"
+      }
+    },
+    "decorators": {
+      "type": "library",
+      "root": "libs/decorators",
+      "entryFile": "index",
+      "sourceRoot": "libs/decorators/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/decorators/tsconfig.lib.json"
+      }
+    },
+    "base-controller": {
+      "type": "library",
+      "root": "libs/base-controller",
+      "entryFile": "index",
+      "sourceRoot": "libs/base-controller/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/base-controller/tsconfig.lib.json"
+      }
+    },
+    "core": {
+      "type": "application",
+      "root": "apps/core",
+      "entryFile": "main",
+      "sourceRoot": "apps/core/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/core/tsconfig.app.json"
+      }
+    },
+    "timer": {
+      "type": "application",
+      "root": "apps/timer",
+      "entryFile": "main",
+      "sourceRoot": "apps/timer/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/timer/tsconfig.app.json"
+      }
+    },
+    "timer-consumer": {
+      "type": "library",
+      "root": "libs/timer-consumer",
+      "entryFile": "index",
+      "sourceRoot": "libs/timer-consumer/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/timer-consumer/tsconfig.lib.json"
+      }
+    }
+  },
+  "monorepo": true,
+  "root": "apps/core"
+}
