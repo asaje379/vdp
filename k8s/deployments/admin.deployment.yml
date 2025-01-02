@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: admin-deployment
+  name: admin
   labels:
     app: admin
 spec:
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: openeco-admin
-          image: openeco/admin
+          image: ghcr.io/asaje379/openeco-admin
           resources:
             limits:
               memory: '512Mi'
